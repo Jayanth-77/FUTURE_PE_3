@@ -65,6 +65,10 @@ const About = () => {
               <h3 className="text-2xl font-bold mb-4">Key Achievements</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
+                  <span className="font-medium">GMRIT Stepcone Event 2025</span>
+                  <span className="text-2xl font-bold">1st Place</span>
+                </div>
+                <div className="flex justify-between items-center">
                   <span className="font-medium">Hack With Vizag 2.0</span>
                   <span className="text-2xl font-bold">7th Place</span>
                 </div>
