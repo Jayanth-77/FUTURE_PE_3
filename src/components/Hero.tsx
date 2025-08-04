@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowDown, Download, Play } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 import profileImage from '@/assets/jayanth-profile.jpg';
 
 const Hero = () => {
@@ -7,13 +7,6 @@ const Hero = () => {
     document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleDownloadCV = () => {
-    // Create a download link for CV
-    const link = document.createElement('a');
-    link.href = '#'; // Replace with actual CV file path
-    link.download = 'Barri_Jayanth_CV.pdf';
-    link.click();
-  };
 
   return (
     <section id="home" className="min-h-screen flex items-center relative overflow-hidden">
@@ -55,23 +48,10 @@ const Hero = () => {
                 Get Started
                 <ArrowDown className="ml-2 h-5 w-5 group-hover:translate-y-1 transition-transform" />
               </Button>
-              <Button 
-                variant="glass" 
-                size="lg"
-                onClick={handleDownloadCV}
-                className="group"
-              >
-                <Download className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                Download CV
-              </Button>
             </div>
 
             {/* Stats */}
             <div className="flex space-x-8 pt-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold bg-accent-gradient bg-clip-text text-transparent">8+</div>
-                <div className="text-sm text-muted-foreground">Years Experience</div>
-              </div>
               <div className="text-center">
                 <div className="text-3xl font-bold bg-accent-gradient bg-clip-text text-transparent">2+</div>
                 <div className="text-sm text-muted-foreground">Major Projects</div>
