@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowDown } from 'lucide-react';
-import profileImage from '@/assets/jayanth-profile.jpg';
+import profileImage from '/lovable-uploads/2bf562d9-4f47-46d5-a157-48e0eb39e8b3.png';
 
 const Hero = () => {
   const scrollToContact = () => {
@@ -66,10 +66,10 @@ const Hero = () => {
           {/* Profile Image */}
           <div className="flex justify-center lg:justify-end">
             <div className="relative">
-              <div className="w-80 h-80 rounded-full overflow-hidden shadow-glow animate-glow">
+              <div className="w-80 h-96 rounded-lg overflow-hidden shadow-glow animate-glow">
                 <img 
                   src={profileImage} 
-                  alt="Barri Jayanth" 
+                  alt="Barri Jayanth at STEPCONE 2025" 
                   className="w-full h-full object-cover"
                 />
               </div>
