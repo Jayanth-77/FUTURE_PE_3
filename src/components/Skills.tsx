@@ -19,8 +19,8 @@ const Skills = () => {
     },
     {
       icon: Brain,
-      title: "AI & Machine Learning",
-      skills: ["Computer Vision", "Machine Learning", "AI Algorithms", "Data Analysis"],
+      title: "Prompt Engineering",
+      skills: ["LLM Optimization", "AI Integration", "GPT Fine-tuning", "Conversational AI"],
       color: "text-purple-500",
       bgColor: "bg-purple-500/10"
     },
@@ -38,7 +38,7 @@ const Skills = () => {
     { skill: "JavaScript", level: 85 },
     { skill: "Python", level: 80 },
     { skill: "HTML/CSS", level: 95 },
-    { skill: "Machine Learning", level: 75 },
+    { skill: "Prompt Engineering", level: 85 },
     { skill: "Firebase", level: 70 }
   ];
 
