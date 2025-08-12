@@ -1,5 +1,6 @@
 import { Heart, Github, Linkedin, Mail, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 const Footer = () => {
   const scrollToTop = () => {
@@ -7,6 +8,40 @@ const Footer = () => {
   };
 
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const w = window as any;
+    if (!w.chatbase || w.chatbase('getState') !== 'initialized') {
+      const base = (...args: any[]) => {
+        if (!w.chatbase.q) {
+          w.chatbase.q = [];
+        }
+        w.chatbase.q.push(args);
+      };
+      w.chatbase = new Proxy(base, {
+        get(target, prop) {
+          if (prop === 'q') return (target as any).q;
+          return (...args: any[]) => (target as any)(prop, ...args);
+        },
+      });
+    }
+
+    const onLoad = () => {
+      if (document.getElementById('tiZ4L-WqbNJYggji-rpz9')) return;
+      const script = document.createElement('script');
+      script.src = 'https://www.chatbase.co/embed.min.js';
+      script.id = 'tiZ4L-WqbNJYggji-rpz9';
+      script.setAttribute('domain', 'www.chatbase.co');
+      document.body.appendChild(script);
+    };
+
+    if (document.readyState === 'complete') {
+      onLoad();
+    } else {
+      window.addEventListener('load', onLoad);
+      return () => window.removeEventListener('load', onLoad);
+    }
+  }, []);
 
   return (
     <footer className="bg-card border-t border-border relative">
