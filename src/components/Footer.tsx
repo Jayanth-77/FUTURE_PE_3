@@ -10,37 +10,38 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    const w = window as any;
-    if (!w.chatbase || w.chatbase('getState') !== 'initialized') {
-      const base = (...args: any[]) => {
-        if (!w.chatbase.q) {
-          w.chatbase.q = [];
-        }
-        w.chatbase.q.push(args);
+    const initializeChatbot = () => {
+      // Initialize chatbase
+      (window as any).chatbaseConfig = {
+        chatbotId: "tiZ4L-WqbNJYggji-rpz9",
+        domain: "www.chatbase.co"
       };
-      w.chatbase = new Proxy(base, {
-        get(target, prop) {
-          if (prop === 'q') return (target as any).q;
-          return (...args: any[]) => (target as any)(prop, ...args);
-        },
-      });
-    }
 
-    const onLoad = () => {
-      if (document.getElementById('tiZ4L-WqbNJYggji-rpz9')) return;
+      // Create and append the script
       const script = document.createElement('script');
       script.src = 'https://www.chatbase.co/embed.min.js';
-      script.id = 'tiZ4L-WqbNJYggji-rpz9';
-      script.setAttribute('domain', 'www.chatbase.co');
-      document.body.appendChild(script);
+      script.defer = true;
+      script.onload = () => {
+        // Configure welcome message after script loads
+        if ((window as any).chatbase) {
+          (window as any).chatbase('config', {
+            welcomeMessage: "Hi! I'm Jayanth's AI assistant. Ask me anything about his projects, skills, or how to contact him!"
+          });
+        }
+      };
+      document.head.appendChild(script);
     };
 
-    if (document.readyState === 'complete') {
-      onLoad();
+    // Initialize immediately if DOM is ready, otherwise wait for load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeChatbot);
     } else {
-      window.addEventListener('load', onLoad);
-      return () => window.removeEventListener('load', onLoad);
+      initializeChatbot();
     }
+
+    return () => {
+      document.removeEventListener('DOMContentLoaded', initializeChatbot);
+    };
   }, []);
 
   return (
@@ -159,12 +160,6 @@ const Footer = () => {
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-full h-1 bg-hero-gradient"></div>
 
-      {/* Chatbase Chatbot Embed */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="tiZ4L-WqbNJYggji-rpz9";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();`,
-        }}
-      />
     </footer>
   );
 };
