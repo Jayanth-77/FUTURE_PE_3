@@ -25,7 +25,7 @@ const Footer = () => {
         // Configure welcome message after script loads
         if ((window as any).chatbase) {
           (window as any).chatbase('config', {
-            welcomeMessage: "Hi! I'm Jayanth's AI assistant. Ask me anything about his projects, skills, or how to contact him!"
+            welcomeMessage: "HI! I'am Jayanth's AI assistant"
           });
         }
       };
