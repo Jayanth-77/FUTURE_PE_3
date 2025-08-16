@@ -38,26 +38,33 @@ const Footer = () => {
     const addVoiceInputToChatbot = () => {
       // Wait for chatbot to be fully loaded
       setTimeout(() => {
-        const chatbotContainer = document.querySelector('#chatbase-bubble-window');
-        if (chatbotContainer) {
+        const chatbotWindow = document.querySelector('#chatbase-bubble-window');
+        const inputContainer = document.querySelector('#chatbase-bubble-window .relative');
+        
+        if (chatbotWindow && inputContainer && !document.querySelector('#voice-input-btn')) {
           // Create voice input button
           const voiceButton = document.createElement('button');
+          voiceButton.id = 'voice-input-btn';
           voiceButton.innerHTML = '🎤';
+          voiceButton.type = 'button';
           voiceButton.style.cssText = `
             position: absolute;
-            top: 10px;
-            right: 50px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            right: 45px;
+            bottom: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             border: none;
-            background: #3b82f6;
-            color: white;
-            font-size: 18px;
+            background: transparent;
+            color: #6b7280;
+            font-size: 16px;
             cursor: pointer;
             z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            hover:background: #f3f4f6;
           `;
           
           let isListening = false;
@@ -74,13 +81,22 @@ const Footer = () => {
             recognition.onstart = () => {
               isListening = true;
               voiceButton.innerHTML = '🔴';
-              voiceButton.style.background = '#ef4444';
+              voiceButton.style.color = '#ef4444';
+              voiceButton.style.animation = 'pulse 1s infinite';
             };
             
             recognition.onend = () => {
               isListening = false;
               voiceButton.innerHTML = '🎤';
-              voiceButton.style.background = '#3b82f6';
+              voiceButton.style.color = '#6b7280';
+              voiceButton.style.animation = 'none';
+            };
+            
+            recognition.onerror = () => {
+              isListening = false;
+              voiceButton.innerHTML = '🎤';
+              voiceButton.style.color = '#6b7280';
+              voiceButton.style.animation = 'none';
             };
             
             recognition.onresult = (event: any) => {
@@ -90,35 +106,72 @@ const Footer = () => {
                 chatInput.value = transcript;
                 chatInput.dispatchEvent(new Event('input', { bubbles: true }));
                 
-                // Trigger send button
+                // Auto-focus the input
+                chatInput.focus();
+                
+                // Trigger send automatically after a short delay
                 setTimeout(() => {
                   const sendButton = document.querySelector('#chatbase-bubble-window button[type="submit"]') as HTMLButtonElement;
-                  if (sendButton) {
+                  if (sendButton && transcript.trim()) {
                     sendButton.click();
                   }
-                }, 100);
+                }, 300);
               }
             };
             
-            voiceButton.onclick = () => {
+            voiceButton.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
               if (isListening) {
                 recognition.stop();
               } else {
-                recognition.start();
+                try {
+                  recognition.start();
+                } catch (error) {
+                  console.log('Speech recognition error:', error);
+                }
               }
             };
           } else {
             voiceButton.onclick = () => {
-              alert('Speech recognition is not supported in your browser');
+              alert('Speech recognition is not supported in your browser. Please use Chrome, Safari, or Edge.');
             };
           }
           
-          chatbotContainer.appendChild(voiceButton);
+          // Add hover effects
+          voiceButton.onmouseenter = () => {
+            if (!isListening) {
+              voiceButton.style.background = '#f3f4f6';
+            }
+          };
+          
+          voiceButton.onmouseleave = () => {
+            if (!isListening) {
+              voiceButton.style.background = 'transparent';
+            }
+          };
+          
+          inputContainer.appendChild(voiceButton);
+          
+          // Add pulse animation styles to document
+          if (!document.querySelector('#voice-pulse-style')) {
+            const style = document.createElement('style');
+            style.id = 'voice-pulse-style';
+            style.textContent = `
+              @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.1); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+              }
+            `;
+            document.head.appendChild(style);
+          }
         } else {
           // Retry if chatbot not loaded yet
           setTimeout(addVoiceInputToChatbot, 500);
         }
-      }, 1000);
+      }, 1500);
     };
 
     // Initialize immediately if DOM is ready, otherwise wait for load
