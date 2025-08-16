@@ -36,39 +36,82 @@ const Footer = () => {
     };
 
     const addVoiceInputToChatbot = () => {
-      // Wait for chatbot to be fully loaded
-      setTimeout(() => {
-        const chatbotWindow = document.querySelector('#chatbase-bubble-window');
-        const inputContainer = document.querySelector('#chatbase-bubble-window .relative');
+      // Wait for chatbot to be fully loaded and check multiple times
+      const checkAndAddMic = () => {
+        // Look for different possible selectors for the chatbot input area
+        const inputSelectors = [
+          '#chatbase-bubble-window .relative',
+          '#chatbase-bubble-window [class*="input"]',
+          '#chatbase-bubble-window form',
+          '#chatbase-bubble-window textarea',
+          '.chatbase-chat-input',
+          '[data-testid="chat-input"]'
+        ];
         
-        if (chatbotWindow && inputContainer && !document.querySelector('#voice-input-btn')) {
+        let inputContainer = null;
+        let textarea = null;
+        
+        // Try to find the input container
+        for (const selector of inputSelectors) {
+          const element = document.querySelector(selector);
+          if (element) {
+            if (element.tagName === 'TEXTAREA') {
+              textarea = element;
+              inputContainer = element.parentElement;
+            } else {
+              inputContainer = element;
+              textarea = element.querySelector('textarea');
+            }
+            break;
+          }
+        }
+        
+        // Also try to find textarea directly
+        if (!textarea) {
+          textarea = document.querySelector('#chatbase-bubble-window textarea') || 
+                   document.querySelector('.chatbase textarea') ||
+                   document.querySelector('[placeholder*="Message"]') ||
+                   document.querySelector('[placeholder*="Type"]');
+        }
+        
+        if (!inputContainer && textarea) {
+          inputContainer = textarea.parentElement;
+        }
+        
+        console.log('Found input container:', inputContainer);
+        console.log('Found textarea:', textarea);
+        
+        if (inputContainer && textarea && !document.querySelector('#voice-input-btn')) {
           // Create voice input button
           const voiceButton = document.createElement('button');
           voiceButton.id = 'voice-input-btn';
           voiceButton.innerHTML = '🎤';
           voiceButton.type = 'button';
+          voiceButton.title = 'Click to speak';
+          
+          // Style the button to fit with the chatbot design
           voiceButton.style.cssText = `
-            position: absolute;
-            right: 45px;
-            bottom: 8px;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 16px;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            hover:background: #f3f4f6;
+            position: absolute !important;
+            right: 40px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 6px !important;
+            border: none !important;
+            background: transparent !important;
+            color: #6b7280 !important;
+            font-size: 16px !important;
+            cursor: pointer !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s ease !important;
           `;
           
           let isListening = false;
-          let recognition: any = null;
+          let recognition = null;
           
           // Check if browser supports speech recognition
           if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -79,40 +122,65 @@ const Footer = () => {
             recognition.lang = 'en-US';
             
             recognition.onstart = () => {
+              console.log('Speech recognition started');
               isListening = true;
               voiceButton.innerHTML = '🔴';
-              voiceButton.style.color = '#ef4444';
+              voiceButton.style.color = '#ef4444 !important';
               voiceButton.style.animation = 'pulse 1s infinite';
             };
             
             recognition.onend = () => {
+              console.log('Speech recognition ended');
               isListening = false;
               voiceButton.innerHTML = '🎤';
-              voiceButton.style.color = '#6b7280';
+              voiceButton.style.color = '#6b7280 !important';
               voiceButton.style.animation = 'none';
             };
             
-            recognition.onerror = () => {
+            recognition.onerror = (event) => {
+              console.log('Speech recognition error:', event.error);
               isListening = false;
               voiceButton.innerHTML = '🎤';
-              voiceButton.style.color = '#6b7280';
+              voiceButton.style.color = '#6b7280 !important';
               voiceButton.style.animation = 'none';
             };
             
-            recognition.onresult = (event: any) => {
+            recognition.onresult = (event) => {
               const transcript = event.results[0][0].transcript;
-              const chatInput = document.querySelector('#chatbase-bubble-window textarea') as HTMLTextAreaElement;
-              if (chatInput) {
-                chatInput.value = transcript;
-                chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+              console.log('Speech transcript:', transcript);
+              
+              if (textarea) {
+                textarea.value = transcript;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                textarea.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Try to trigger React's onChange
+                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+                if (nativeInputValueSetter) {
+                  nativeInputValueSetter.call(textarea, transcript);
+                  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 
                 // Auto-focus the input
-                chatInput.focus();
+                textarea.focus();
                 
-                // Trigger send automatically after a short delay
+                // Try to find and click send button
                 setTimeout(() => {
-                  const sendButton = document.querySelector('#chatbase-bubble-window button[type="submit"]') as HTMLButtonElement;
+                  const sendSelectors = [
+                    '#chatbase-bubble-window button[type="submit"]',
+                    '#chatbase-bubble-window [data-testid="send-button"]',
+                    '#chatbase-bubble-window button:last-child',
+                    '.chatbase-send-button'
+                  ];
+                  
+                  let sendButton = null;
+                  for (const selector of sendSelectors) {
+                    sendButton = document.querySelector(selector);
+                    if (sendButton) break;
+                  }
+                  
                   if (sendButton && transcript.trim()) {
+                    console.log('Clicking send button');
                     sendButton.click();
                   }
                 }, 300);
@@ -124,12 +192,15 @@ const Footer = () => {
               e.stopPropagation();
               
               if (isListening) {
+                console.log('Stopping speech recognition');
                 recognition.stop();
               } else {
                 try {
+                  console.log('Starting speech recognition');
                   recognition.start();
                 } catch (error) {
                   console.log('Speech recognition error:', error);
+                  alert('Please allow microphone access and try again.');
                 }
               }
             };
@@ -142,17 +213,24 @@ const Footer = () => {
           // Add hover effects
           voiceButton.onmouseenter = () => {
             if (!isListening) {
-              voiceButton.style.background = '#f3f4f6';
+              voiceButton.style.background = '#f3f4f6 !important';
             }
           };
           
           voiceButton.onmouseleave = () => {
             if (!isListening) {
-              voiceButton.style.background = 'transparent';
+              voiceButton.style.background = 'transparent !important';
             }
           };
           
+          // Make the input container position relative if it's not already
+          const computedStyle = window.getComputedStyle(inputContainer);
+          if (computedStyle.position === 'static') {
+            inputContainer.style.position = 'relative';
+          }
+          
           inputContainer.appendChild(voiceButton);
+          console.log('Voice button added to chatbot');
           
           // Add pulse animation styles to document
           if (!document.querySelector('#voice-pulse-style')) {
@@ -160,18 +238,41 @@ const Footer = () => {
             style.id = 'voice-pulse-style';
             style.textContent = `
               @keyframes pulse {
-                0% { transform: scale(1); opacity: 1; }
-                50% { transform: scale(1.1); opacity: 0.7; }
-                100% { transform: scale(1); opacity: 1; }
+                0% { transform: translateY(-50%) scale(1); opacity: 1; }
+                50% { transform: translateY(-50%) scale(1.1); opacity: 0.7; }
+                100% { transform: translateY(-50%) scale(1); opacity: 1; }
               }
             `;
             document.head.appendChild(style);
           }
-        } else {
-          // Retry if chatbot not loaded yet
-          setTimeout(addVoiceInputToChatbot, 500);
+          
+          return true; // Successfully added
         }
-      }, 1500);
+        return false; // Not ready yet
+      };
+      
+      // Try immediately and then retry every 500ms for up to 10 seconds
+      let attempts = 0;
+      const maxAttempts = 20;
+      
+      const tryAddMic = () => {
+        attempts++;
+        console.log(`Attempting to add microphone (attempt ${attempts})`);
+        
+        if (checkAndAddMic()) {
+          console.log('Microphone successfully added to chatbot!');
+          return;
+        }
+        
+        if (attempts < maxAttempts) {
+          setTimeout(tryAddMic, 500);
+        } else {
+          console.log('Failed to add microphone after maximum attempts');
+        }
+      };
+      
+      // Start trying after initial delay
+      setTimeout(tryAddMic, 2000);
     };
 
     // Initialize immediately if DOM is ready, otherwise wait for load
