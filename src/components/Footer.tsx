@@ -27,9 +27,98 @@ const Footer = () => {
           (window as any).chatbase('config', {
             welcomeMessage: "HI! I'am Jayanth's AI assistant"
           });
+          
+          // Add voice input functionality
+          addVoiceInputToChatbot();
         }
       };
       document.head.appendChild(script);
+    };
+
+    const addVoiceInputToChatbot = () => {
+      // Wait for chatbot to be fully loaded
+      setTimeout(() => {
+        const chatbotContainer = document.querySelector('#chatbase-bubble-window');
+        if (chatbotContainer) {
+          // Create voice input button
+          const voiceButton = document.createElement('button');
+          voiceButton.innerHTML = '🎤';
+          voiceButton.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+          `;
+          
+          let isListening = false;
+          let recognition: any = null;
+          
+          // Check if browser supports speech recognition
+          if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+              isListening = true;
+              voiceButton.innerHTML = '🔴';
+              voiceButton.style.background = '#ef4444';
+            };
+            
+            recognition.onend = () => {
+              isListening = false;
+              voiceButton.innerHTML = '🎤';
+              voiceButton.style.background = '#3b82f6';
+            };
+            
+            recognition.onresult = (event: any) => {
+              const transcript = event.results[0][0].transcript;
+              const chatInput = document.querySelector('#chatbase-bubble-window textarea') as HTMLTextAreaElement;
+              if (chatInput) {
+                chatInput.value = transcript;
+                chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // Trigger send button
+                setTimeout(() => {
+                  const sendButton = document.querySelector('#chatbase-bubble-window button[type="submit"]') as HTMLButtonElement;
+                  if (sendButton) {
+                    sendButton.click();
+                  }
+                }, 100);
+              }
+            };
+            
+            voiceButton.onclick = () => {
+              if (isListening) {
+                recognition.stop();
+              } else {
+                recognition.start();
+              }
+            };
+          } else {
+            voiceButton.onclick = () => {
+              alert('Speech recognition is not supported in your browser');
+            };
+          }
+          
+          chatbotContainer.appendChild(voiceButton);
+        } else {
+          // Retry if chatbot not loaded yet
+          setTimeout(addVoiceInputToChatbot, 500);
+        }
+      }, 1000);
     };
 
     // Initialize immediately if DOM is ready, otherwise wait for load
