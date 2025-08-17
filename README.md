@@ -39,6 +39,9 @@ Each chatbot includes:
 - ✅ [Final Chatbot Personas PDF](./Final_Chatbot_Deliverables.pdf) – contains all persona profiles, Q&A flows, and documentation.  
 - ✅ README.md (this file).  
 
+## 🎥 Demo Video
+Watch the chatbot demo here: [Google Drive Link](https://drive.google.com/file/d/1gEUIu_nx35v3hd6fhobEnw-CyMhReS1T/view?usp=drivesdk)
+
 ## 🚀 Tools Used
 - **Chatbase** – for building AI assistants  
 - **Markdown & PDF tools** – for documentation  
